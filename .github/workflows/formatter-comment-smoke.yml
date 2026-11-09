@@ -1,0 +1,31 @@
+name: Formatter comment alignment smoke
+
+on:
+  push:
+    branches:
+      - ci/formatter-comment-smoke
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  formatter-align-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bazel and parser dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y bison flex
+          sudo wget -q https://github.com/bazelbuild/bazel/releases/download/7.6.1/bazel-7.6.1-linux-x86_64 -O /usr/local/bin/bazel
+          sudo chmod +x /usr/local/bin/bazel
+          bazel --version
+      - name: Run formatter alignment regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          bazel test -c fastbuild --test_output=errors //verible/verilog/formatting:formatter_align_test
