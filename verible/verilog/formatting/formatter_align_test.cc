@@ -3231,7 +3231,8 @@ TEST(FormatterEndToEndTest, ModuleNetVariableTrailingCommentsOptIn) {
 
   style.module_net_variable_align_trailing_comments = true;
   std::ostringstream aligned;
-  const auto aligned_status = FormatVerilog(kInput, "<filename>", style, aligned);
+  const auto aligned_status =
+      FormatVerilog(kInput, "<filename>", style, aligned);
   ASSERT_TRUE(aligned_status.ok()) << aligned_status.message();
   EXPECT_EQ(aligned.str(),
             "module m;\n"
