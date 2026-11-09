@@ -1472,7 +1472,9 @@ static void non_tree_column_scanner(
 // Keeping the default scanner avoids changing formatting in existing projects.
 static verible::AlignmentCellScannerFunction DataDeclarationAlignmentScanner(
     const FormatStyle &style) {
-  auto make_scanner = [style] { return DataDeclarationColumnSchemaScanner(style); };
+  auto make_scanner = [style] {
+    return DataDeclarationColumnSchemaScanner(style);
+  };
   if (style.module_net_variable_align_trailing_comments) {
     return AlignmentCellScannerGenerator<DataDeclarationColumnSchemaScanner>(
         make_scanner, non_tree_column_scanner);

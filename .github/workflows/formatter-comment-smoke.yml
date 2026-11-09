@@ -29,3 +29,25 @@ jobs:
         run: |
           set -euo pipefail
           bazel test -c fastbuild --test_output=errors //verible/verilog/formatting:formatter_align_test
+      - name: Verify formatter CLI flag and stable output
+        shell: bash
+        run: |
+          set -euo pipefail
+          bazel build -c fastbuild //verible/verilog/tools/formatter:verible-verilog-format
+          formatter=bazel-bin/verible/verilog/tools/formatter/verible-verilog-format
+          cat > /tmp/input.sv <<'SV'
+          module m;
+          logic a; // first
+          logic longer_name; // second
+          endmodule
+          SV
+          cat > /tmp/expected.sv <<'SV'
+          module m;
+            logic a;            // first
+            logic longer_name;  // second
+          endmodule
+          SV
+          "$formatter" --module_net_variable_alignment=align --module_net_variable_align_trailing_comments=true /tmp/input.sv > /tmp/actual.sv
+          diff -u /tmp/expected.sv /tmp/actual.sv
+          "$formatter" --module_net_variable_alignment=align --module_net_variable_align_trailing_comments=true /tmp/actual.sv > /tmp/repeated.sv
+          diff -u /tmp/actual.sv /tmp/repeated.sv
