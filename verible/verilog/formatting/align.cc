@@ -1468,6 +1468,19 @@ static void non_tree_column_scanner(
   }
 }
 
+// Use the existing non-tree token column scanner only when explicitly opted in.
+// Keeping the default scanner avoids changing formatting in existing projects.
+static verible::AlignmentCellScannerFunction DataDeclarationAlignmentScanner(
+    const FormatStyle &style) {
+  auto make_scanner = [style] { return DataDeclarationColumnSchemaScanner(style); };
+  if (style.module_net_variable_align_trailing_comments) {
+    return AlignmentCellScannerGenerator<DataDeclarationColumnSchemaScanner>(
+        make_scanner, non_tree_column_scanner);
+  }
+  return AlignmentCellScannerGenerator<DataDeclarationColumnSchemaScanner>(
+      make_scanner);
+}
+
 // Global registry of all known alignment handlers for Verilog.
 // This organization lets the same handlers be re-used in multiple
 // syntactic contexts, e.g. data declarations can be module items and
@@ -1475,8 +1488,7 @@ static void non_tree_column_scanner(
 static const AlignmentHandlerMapType &AlignmentHandlerLibrary() {
   static const auto *handler_map = new AlignmentHandlerMapType{
       {AlignableSyntaxSubtype::kDataDeclaration,
-       {UnstyledAlignmentCellScannerGenerator<
-            DataDeclarationColumnSchemaScanner>(),
+       {DataDeclarationAlignmentScanner,
         function_from_pointer_to_member(
             &FormatStyle::module_net_variable_alignment)}},
       {AlignableSyntaxSubtype::kNamedActualParameters,

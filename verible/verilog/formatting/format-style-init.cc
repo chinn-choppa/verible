@@ -109,6 +109,9 @@ ABSL_FLAG(AlignmentPolicy, module_net_variable_alignment,
           AlignmentPolicy::kInferUserIntent,
           "Format net/variable declarations in module, generate, "
           "interface, and package bodies: {align,flush-left,preserve,infer}");
+ABSL_FLAG(bool, module_net_variable_align_trailing_comments, false,
+          "Align end-of-line comments in groups of module net/variable "
+          "declarations when alignment is enabled (default: false).");
 ABSL_FLAG(AlignmentPolicy, formal_parameters_alignment,
           AlignmentPolicy::kInferUserIntent,
           "Format formal parameters in module/interface/class headers "
@@ -191,6 +194,7 @@ void InitializeFromFlags(FormatStyle *style) {
   STYLE_FROM_FLAG(named_port_indentation);
   STYLE_FROM_FLAG(named_port_alignment);
   STYLE_FROM_FLAG(module_net_variable_alignment);
+  STYLE_FROM_FLAG(module_net_variable_align_trailing_comments);
   STYLE_FROM_FLAG(assignment_statement_alignment);
   STYLE_FROM_FLAG(enum_assignment_statement_alignment);
   STYLE_FROM_FLAG(formal_parameters_indentation);
