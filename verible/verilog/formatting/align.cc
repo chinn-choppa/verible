@@ -1477,12 +1477,12 @@ static void data_declaration_trailing_comment_scanner(
     verible::ColumnPositionTree *column_entries) {
   static const SyntaxTreePath kTrailingCommentPath = {
       kTrailingNonTreeTokenPathIndex, 1};
-  const auto comment_it = std::find_if(
-      trailing_tokens.begin(), trailing_tokens.end(),
-      [](const PreFormatToken &token) {
-        return token.TokenEnum() == TK_EOL_COMMENT ||
-               token.TokenEnum() == TK_COMMENT_BLOCK;
-      });
+  const auto comment_it =
+      std::find_if(trailing_tokens.begin(), trailing_tokens.end(),
+                   [](const PreFormatToken &token) {
+                     return token.TokenEnum() == TK_EOL_COMMENT ||
+                            token.TokenEnum() == TK_COMMENT_BLOCK;
+                   });
   if (comment_it != trailing_tokens.end()) {
     column_entries->Children().emplace_back(verible::ColumnPositionEntry{
         kTrailingCommentPath, *comment_it->token, FlushLeft});
