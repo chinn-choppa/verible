@@ -88,6 +88,10 @@ struct FormatStyle : public verible::BasicFormatStyle {
   // Internal tests assume these are forced to kAlign.
   AlignmentPolicy module_net_variable_alignment = AlignmentPolicy::kAlign;
 
+  // Opt-in alignment of end-of-line comments for data declarations,
+  // including local declarations. Existing formatting remains the default.
+  bool data_declaration_align_trailing_comments = false;
+
   // Control how various assignment statements should be aligned.
   // Applies in module, generate, interface, and package bodies.
   // This covers: continuous assignment statements,

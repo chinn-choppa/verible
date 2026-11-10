@@ -16,6 +16,7 @@
 // Penalty-sensitive tests belong in formatter-tuning_test.cc.
 
 #include <sstream>
+#include <string>
 #include <string_view>
 
 #include "gtest/gtest.h"
@@ -3204,6 +3205,80 @@ static constexpr FormatterTestCase kAlignFormatterTestCases[] = {
     // Comments around and inside macro calls.
 
 };
+
+// Check that aligning trailing comments is opt-in, without changing the
+// default formatting of net/variable declarations.
+TEST(FormatterEndToEndTest, ModuleNetVariableTrailingCommentsOptIn) {
+  constexpr std::string_view kInput =
+      "module m;\n"
+      "logic a; // first\n"
+      "logic longer_name; // second\n"
+      "endmodule\n";
+
+  FormatStyle style;
+  style.column_limit = 120;
+  style.indentation_spaces = 2;
+  style.module_net_variable_alignment = AlignmentPolicy::kAlign;
+
+  std::ostringstream unchanged;
+  const auto original_status =
+      FormatVerilog(kInput, "<filename>", style, unchanged);
+  ASSERT_TRUE(original_status.ok()) << original_status.message();
+  EXPECT_EQ(unchanged.str(),
+            "module m;\n"
+            "  logic a;  // first\n"
+            "  logic longer_name;  // second\n"
+            "endmodule\n");
+
+  style.data_declaration_align_trailing_comments = true;
+  std::ostringstream aligned;
+  const auto aligned_status =
+      FormatVerilog(kInput, "<filename>", style, aligned);
+  ASSERT_TRUE(aligned_status.ok()) << aligned_status.message();
+  EXPECT_EQ(aligned.str(),
+            "module m;\n"
+            "  logic a;            // first\n"
+            "  logic longer_name;  // second\n"
+            "endmodule\n");
+
+  // The formatter must converge on a second pass when the flag is enabled.
+  std::ostringstream repeated;
+  const auto repeat_status =
+      FormatVerilog(aligned.str(), "<filename>", style, repeated);
+  ASSERT_TRUE(repeat_status.ok()) << repeat_status.message();
+  EXPECT_EQ(repeated.str(), aligned.str());
+}
+
+// The opt-in data declaration policy also applies to local declarations in
+// procedural blocks, which use the same alignment group subtype.
+TEST(FormatterEndToEndTest, LocalDataDeclarationTrailingCommentsOptIn) {
+  constexpr std::string_view kInput =
+      "module m;\n"
+      "initial begin\n"
+      "int a; // first\n"
+      "int longer_name; // second\n"
+      "end\n"
+      "endmodule\n";
+
+  FormatStyle style;
+  style.column_limit = 120;
+  style.indentation_spaces = 2;
+  style.module_net_variable_alignment = AlignmentPolicy::kAlign;
+  style.data_declaration_align_trailing_comments = true;
+  std::ostringstream aligned;
+  const auto status = FormatVerilog(kInput, "<filename>", style, aligned);
+  ASSERT_TRUE(status.ok()) << status.message();
+  const auto result = aligned.str();
+  const auto first = result.find("// first");
+  const auto second = result.find("// second");
+  ASSERT_NE(first, std::string::npos);
+  ASSERT_NE(second, std::string::npos);
+  const auto first_start = result.rfind('\n', first);
+  const auto second_start = result.rfind('\n', second);
+  EXPECT_EQ(
+      first - (first_start == std::string::npos ? 0 : first_start + 1),
+      second - (second_start == std::string::npos ? 0 : second_start + 1));
+}
 
 TEST(FormatterEndToEndTest, AlignFormatterTestCases) {
   RunFormatterTestCases40(kAlignFormatterTestCases);
