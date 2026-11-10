@@ -62,7 +62,7 @@ To pipe from stdin, use '-' as <file>.
     --module_net_variable_alignment (Format net/variable declarations
       in module, generate, interface, and package bodies:
       {align,flush-left,preserve,infer}); default: infer;
-    --module_net_variable_align_trailing_comments (If true, align end-of-line
+    --data_declaration_align_trailing_comments (If true, align end-of-line
       comments in net/variable declaration groups when alignment is enabled.);
       default: false;
     --named_parameter_alignment (Format named actual parameters:
@@ -131,12 +131,12 @@ To pipe from stdin, use '-' as <file>.
 
 ### Opt-in trailing comment alignment
 
-For a tabular style that aligns end-of-line comments on module-level
-net/variable declarations, use:
+For a tabular style that aligns end-of-line comments in data declaration
+groups (including procedural-local declarations), use:
 
 ```shell
-verible-verilog-format --module_net_variable_alignment=align \\
-  --module_net_variable_align_trailing_comments=true file.sv
+verible-verilog-format --module_net_variable_alignment=align \
+  --data_declaration_align_trailing_comments=true file.sv
 ```
 
 The option is disabled by default to preserve existing formatting. The

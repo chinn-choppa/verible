@@ -1495,7 +1495,7 @@ static verible::AlignmentCellScannerFunction DataDeclarationAlignmentScanner(
   auto make_scanner = [style] {
     return DataDeclarationColumnSchemaScanner(style);
   };
-  if (style.module_net_variable_align_trailing_comments) {
+  if (style.data_declaration_align_trailing_comments) {
     return AlignmentCellScannerGenerator<DataDeclarationColumnSchemaScanner>(
         make_scanner, data_declaration_trailing_comment_scanner);
   }
