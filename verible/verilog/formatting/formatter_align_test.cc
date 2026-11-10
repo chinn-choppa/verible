@@ -3275,8 +3275,9 @@ TEST(FormatterEndToEndTest, LocalDataDeclarationTrailingCommentsOptIn) {
   ASSERT_NE(second, std::string::npos);
   const auto first_start = result.rfind('\n', first);
   const auto second_start = result.rfind('\n', second);
-  EXPECT_EQ(first - (first_start == std::string::npos ? 0 : first_start + 1),
-            second - (second_start == std::string::npos ? 0 : second_start + 1));
+  EXPECT_EQ(
+      first - (first_start == std::string::npos ? 0 : first_start + 1),
+      second - (second_start == std::string::npos ? 0 : second_start + 1));
 }
 
 TEST(FormatterEndToEndTest, AlignFormatterTestCases) {
