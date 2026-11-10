@@ -1468,8 +1468,28 @@ static void non_tree_column_scanner(
   }
 }
 
-// Use the existing non-tree token column scanner only when explicitly opted in.
-// Keeping the default scanner avoids changing formatting in existing projects.
+// Align trailing comments without changing how declaration punctuation is
+// handled. The general scanner also handles commas and colons, which are not
+// part of this opt-in style policy.
+static void data_declaration_trailing_comment_scanner(
+    verible::FormatTokenRange /*leading_tokens*/,
+    verible::FormatTokenRange trailing_tokens,
+    verible::ColumnPositionTree *column_entries) {
+  static const SyntaxTreePath kTrailingCommentPath = {
+      kTrailingNonTreeTokenPathIndex, 1};
+  const auto comment_it = std::find_if(
+      trailing_tokens.begin(), trailing_tokens.end(),
+      [](const PreFormatToken &token) {
+        return token.TokenEnum() == TK_EOL_COMMENT ||
+               token.TokenEnum() == TK_COMMENT_BLOCK;
+      });
+  if (comment_it != trailing_tokens.end()) {
+    column_entries->Children().emplace_back(verible::ColumnPositionEntry{
+        kTrailingCommentPath, *comment_it->token, FlushLeft});
+  }
+}
+
+// Keep the default scanner unless comment alignment is explicitly enabled.
 static verible::AlignmentCellScannerFunction DataDeclarationAlignmentScanner(
     const FormatStyle &style) {
   auto make_scanner = [style] {
@@ -1477,7 +1497,7 @@ static verible::AlignmentCellScannerFunction DataDeclarationAlignmentScanner(
   };
   if (style.module_net_variable_align_trailing_comments) {
     return AlignmentCellScannerGenerator<DataDeclarationColumnSchemaScanner>(
-        make_scanner, non_tree_column_scanner);
+        make_scanner, data_declaration_trailing_comment_scanner);
   }
   return AlignmentCellScannerGenerator<DataDeclarationColumnSchemaScanner>(
       make_scanner);
